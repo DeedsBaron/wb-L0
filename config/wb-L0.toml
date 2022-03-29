@@ -1,0 +1,15 @@
+bind_addr = ":8080"
+log_level = "debug"
+requestfreq = 500
+sendmessagetimeout = 2500
+[storage]
+    host = "postgresql"
+    port = "5432"
+    database = "spam"
+    username = "deedsbaron"
+    password = "0809"
+    attempts2con = 5
+[nats]
+    serverID = "test-cluster"
+    clientID = "test-wb-L0"
+    natsUrl = "nats://localhost:4222"
