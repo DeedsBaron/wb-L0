@@ -2,22 +2,25 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
-	"log"
+	"github.com/sirupsen/logrus"
 	"wb-L0/internal/app/wb-L0/flags"
+	"wb-L0/internal/app/wb-L0/logger"
 )
 
 var (
-	Config config
+	Config Cfg
 )
 
 func init() {
 	err := NewConfig(&Config)
 	if err != nil {
-		log.Fatal("Can't parse config: ", err.Error())
+		logrus.Fatal("Can't parse config: ", err.Error())
 	}
+	logrus.Info("Config successfully load")
+	logger.ConfigureLogger(Config.LogLevel)
 }
 
-type config struct {
+type Cfg struct {
 	BindAddr           string `toml:"bind_addr"`
 	LogLevel           string `toml:"log_level"`
 	Token              string `toml:"token"`
@@ -37,13 +40,15 @@ type config struct {
 		ServerID string `toml:"serverID"`
 		ClientID string `toml:"clientID"`
 		NatsUrl  string `toml:"natsUrl"`
+		Interval int    `toml:"interval"`
+		MaxOut   int    `toml:"maxout"`
 	}
 }
 
-func NewConfig(cfg *config) error {
+func NewConfig(cfg *Cfg) error {
 	_, err := toml.DecodeFile(flags.ConfigPath, cfg)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 		return err
 	}
 	return nil

@@ -24,7 +24,7 @@ status:
 	docker ps -a
 
 test:
-	@$(MAKE) test -s -C spam
+	 go test -v -count=1 ./... -cover
 
 pub:
 	go run nats-streaming-publish/publish.go

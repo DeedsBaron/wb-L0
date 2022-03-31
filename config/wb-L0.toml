@@ -3,9 +3,9 @@ log_level = "debug"
 requestfreq = 500
 sendmessagetimeout = 2500
 [storage]
-    host = "postgresql"
+    host = "localhost"
     port = "5432"
-    database = "spam"
+    database = "test"
     username = "deedsbaron"
     password = "0809"
     attempts2con = 5
@@ -13,3 +13,5 @@ sendmessagetimeout = 2500
     serverID = "test-cluster"
     clientID = "test-wb-L0"
     natsUrl = "nats://localhost:4222"
+    interval = 1
+    maxout = 5

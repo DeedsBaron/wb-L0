@@ -15,22 +15,21 @@ func main() {
 		fmt.Println(err.Error())
 	}
 
+	var message []byte
 	f, err := os.Open("nats-streaming-publish/publish.json")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	s := bufio.NewScanner(f)
 	for s.Scan() {
-		fmt.Println(s.Text())
+		message = append(message, s.Bytes()...)
 	}
 	err = s.Err()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	//
-	//sp.Publish("test", []byte("Hello World")) // does not return until an ack has been received from NATS Streaming
-	//
-	//// Close connection
+	sp.Publish("test", message) // does not return until an ack has been received from NATS Streaming
+	//Close connection
 	sp.Close()
 }

@@ -10,22 +10,22 @@ services:
         - "8222:8222"
         - "4222:4222"
 
-#  postgresql:
-#    container_name: postgresql
-#    build:
-#      context: ./postgresql/
-#      args:
-#        DB_HOST: ${DB_HOST}
-#        DB_PORT: ${DB_PORT}
-#        POSTGRES_DB: ${POSTGRES_DB}
-#        POSTGRES_USER: ${POSTGRES_USER}
-#        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#    image: postgresql
-#    restart: always
-#    volumes:
-#      - db-data:/var/lib/postgresql/data
-#    ports:
-#      - "5432:5432"
+  postgresql:
+    container_name: postgres
+    build:
+      context: ./postgres/
+      args:
+        DB_HOST: ${DB_HOST}
+        DB_PORT: ${DB_PORT}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    image: postgresql
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 #
 #  spam:
 #    container_name: spam
