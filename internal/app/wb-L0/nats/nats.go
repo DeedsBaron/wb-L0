@@ -3,12 +3,12 @@ package nats
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/nats-io/stan.go"
 	"time"
 	"wb-L0/internal/app/wb-L0/channels"
 	"wb-L0/internal/app/wb-L0/config"
 	"wb-L0/internal/app/wb-L0/logger"
+	"wb-L0/internal/app/wb-L0/modelValidation"
 	"wb-L0/internal/app/wb-L0/postgres"
 	"wb-L0/internal/app/wb-L0/storage"
 )
@@ -59,6 +59,7 @@ func Subscribe() {
 			// Subscribe with manual ack mode, and set AckWait to 60 seconds
 			aw, _ := time.ParseDuration("60s")
 			_, err := Sc.Subscribe("test", func(msg *stan.Msg) {
+				logger.Log.Info("Messasge recieved")
 				msg.Ack() // Manual ACK
 
 				// Unmarshal JSON that represents the Model data
@@ -73,11 +74,11 @@ func Subscribe() {
 					return
 				}
 
-				//Handle the message
-				logger.Log.Info("Messasge recieved")
+				if modelValidation.Validate(storage.Model) {
+					return
+				}
+
 				postgres.AddToDb()
-				fmt.Println(storage.Model.Payment.RequestID)
-				//log.Printf("%s", string(msg.Data))
 
 			}, stan.DurableName("durableID"),
 				stan.MaxInflight(25),

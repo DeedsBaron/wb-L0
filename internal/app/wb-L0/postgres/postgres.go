@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
-	"strconv"
 	"time"
 	"wb-L0/internal/app/wb-L0/config"
 	"wb-L0/internal/app/wb-L0/logger"
@@ -104,16 +103,13 @@ func AddDelivery() (int, error) {
 	return fkDel, nil
 }
 
-func AddItems() ([]int, error) {
-	var fkItems []int
-	var fkItem int
-
-	for i, val := range storage.Model.Items {
+func AddItems() error {
+	for _, val := range storage.Model.Items {
 		q := `INSERT INTO items (chrt_id, track_number, price, rid, 
 			name, sale, size, total_price, nm_id, brand, status)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id;`
-		err := Pool.QueryRow(context.Background(), q,
+		_, err := Pool.Exec(context.Background(), q,
 			val.ChrtID,
 			val.TrackNumber,
 			val.Price,
@@ -125,15 +121,13 @@ func AddItems() ([]int, error) {
 			val.NmID,
 			val.Brand,
 			val.Status,
-		).Scan(&fkItem)
+		)
 		if err != nil {
-			logger.Log.Error("Wrong Item[", strconv.Itoa(i), "] :", err)
-			return fkItems, err
+			return err
 		}
-		fkItems = append(fkItems, fkItem)
 	}
 	logger.Log.Debug("Successfully added info to Items table")
-	return fkItems, nil
+	return nil
 }
 
 func AddWb(fkPay, fkDel int) (int, error) {
@@ -167,6 +161,19 @@ func AddWb(fkPay, fkDel int) (int, error) {
 	return fkWb, nil
 }
 
+func AddWbItems() error {
+	for _, val := range storage.Model.Items {
+		q := `INSERT INTO wb_items (order_uid, chrt_id)
+		VALUES ($1, $2)`
+		_, err := Pool.Exec(context.Background(), q, storage.Model.OrderUID, val.ChrtID)
+		if err != nil {
+			return err
+		}
+	}
+	logger.Log.Debug("Successfully added info to Wb_Items table")
+	return nil
+}
+
 func AddToDb() {
 	fkPay, err := AddPayment()
 	fmt.Println("fkPay = ", fkPay)
@@ -182,9 +189,9 @@ func AddToDb() {
 		return
 	}
 
-	fkItems, err := AddItems()
+	err = AddItems()
 	if err != nil {
-		logger.Log.Error("Wrong Item[", strconv.Itoa(len(fkItems)-1), "] :", err)
+		logger.Log.Error(err)
 		return
 	}
 	fkWb, err := AddWb(fkPay, fkDel)
@@ -192,5 +199,10 @@ func AddToDb() {
 		logger.Log.Error(err)
 		return
 	}
-	fmt.Println("fkPay = ", fkPay, "fkDel = ", fkDel, "fkItems = ", fkItems, "fkWb = ", fkWb)
+	err = AddWbItems()
+	if err != nil {
+		logger.Log.Error(err)
+		return
+	}
+	fmt.Println("fkPay = ", fkPay, "fkDel = ", fkDel, "fkWb = ", fkWb)
 }

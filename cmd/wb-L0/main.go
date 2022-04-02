@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	//panic("dsfsdf")
 	go nats.Subscribe()
 	if err := apiserver.Server.Start(); err != nil {
 		logger.Log.Fatal(err)
