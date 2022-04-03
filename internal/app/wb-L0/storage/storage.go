@@ -1,10 +1,19 @@
 package storage
 
-import "time"
+import (
+	"sync"
+	"time"
+	"wb-L0/internal/app/wb-L0/logger"
+)
 
 var (
-	Model = &ModelJSON{}
+	Cash Storage
 )
+
+type Storage struct {
+	Store map[string]ModelJSON
+	Mu    sync.Mutex
+}
 
 type ModelJSON struct {
 	OrderUID    string `json:"order_uid" validate:"required"`
@@ -56,4 +65,31 @@ type ModelJSON struct {
 	SmID              int       `json:"sm_id" validate:"required"`
 	DateCreated       time.Time `json:"date_created" validate:"required"`
 	OofShard          string    `json:"oof_shard" validate:"required"`
+}
+
+func init() {
+	Cash = NewCash()
+}
+
+func RecoverCash() {
+
+}
+
+func AddToCash(model *ModelJSON) {
+	Cash.Mu.Lock()
+	if _, ok := Cash.Store[model.OrderUID]; ok {
+		logger.Log.Info("This model is already in cash memory")
+		Cash.Mu.Unlock()
+		return
+	}
+	Cash.Store[model.OrderUID] = *model
+	logger.Log.Info("Successfully added model to cash memory")
+	Cash.Mu.Unlock()
+}
+
+func NewCash() Storage {
+	return Storage{
+		Store: make(map[string]ModelJSON),
+		Mu:    sync.Mutex{},
+	}
 }

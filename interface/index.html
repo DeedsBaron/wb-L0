@@ -6,7 +6,7 @@
 
 
 
-      <link rel="stylesheet" href="css/style.cs">
+	<link rel="stylesheet" href="css/style.css"/>
 
 
 </head>
@@ -19,15 +19,15 @@
 		<tbody>
 			<tr>
 				<td>Order_uid</td>
-				<td>Cell2</td>
+				<td>{{.OrderUID}}</td>
 			</tr>
 			<tr>
 				<td>Track_number</td>
-				<td>Cell 2</td>
+				<td>{{.TrackNumber}}</td>
 			</tr>
 			<tr>
 				<td>Entry</td>
-				<td>Cell 2</td>
+				<td>{{.Entry}}</td>
 			</tr>
 			<tr>
 				<td>Delivery</td>
@@ -35,31 +35,31 @@
 					<table border="2">
 						<tr>
 							<td>Name</td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Name}}</td>
 						</tr>
 						<tr>
 							<td> Phone </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Phone}}</td>
 						</tr>
 						<tr>
 							<td> Zip </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Zip}}</td>
 						</tr>
 						<tr>
 							<td> City </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.City}}</td>
 						</tr>
 						<tr>
 							<td> Address </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Address}}</td>
 						</tr>
 						<tr>
 							<td> Region </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Region}}</td>
 						</tr>
 						<tr>
 							<td> Email </td>
-							<td>Table 2</td>
+							<td>{{.Delivery.Email}}</td>
 						</tr>
 					</table>
 				</td>
@@ -70,82 +70,115 @@
 					<table border="2">
 						<tr>
 							<td>Transaction</td>
-							<td>Table 2</td>
+							<td>{{.Payment.Transaction}}</td>
 						</tr>
 						<tr>
 							<td> Request_id </td>
-							<td>Table 2</td>
+							<td>{{.Payment.RequestID}}</td>
 						</tr>
 						<tr>
 							<td> Currency </td>
-							<td>Table 2</td>
+							<td>{{.Payment.Currency}}</td>
 						</tr>
 						<tr>
 							<td> Provider </td>
-							<td>Table 2</td>
+							<td>{{.Payment.Provider}}</td>
 						</tr>
 						<tr>
 							<td> Amount </td>
-							<td>Table 2</td>
+							<td>{{.Payment.Amount}}</td>
 						</tr>
 						<tr>
 							<td> Payment_dt </td>
-							<td>Table 2</td>
+							<td>{{.Payment.PaymentDt}}</td>
 						</tr>
 						<tr>
 							<td> Bank </td>
-							<td>Table 2</td>
+							<td>{{.Payment.Bank}}</td>
 						</tr>
 						<tr>
 							<td> Delivery_cost </td>
-							<td>Table 2</td>
+							<td>{{.Payment.DeliveryCost}}</td>
 						</tr>
 						<tr>
 							<td> Goods_total </td>
-							<td>Table 2</td>
+							<td>{{.Payment.GoodsTotal}}</td>
 						</tr>
 						<tr>
 							<td> Custom_fee </td>
-							<td>Table 2</td>
+							<td>{{.Payment.CustomFee}}</td>
 						</tr>
 					</table>
 				</td>
 			</tr>
 			<tr>
 				<td>Items</td>
-				<td>Cell 2</td>
+				<td>
+					<table border="2">
+						<thead>
+						<tr>
+							<th>Chrt_id</th>
+							<th>Track_number</th>
+							<th>Price</th>
+							<th>Rid</th>
+							<th>Name</th>
+							<th>Sale</th>
+							<th>Size</th>
+							<th>Total_price</th>
+							<th>Num_id</th>
+							<th>Brand</th>
+							<th>Status</th>
+						</tr>
+						</thead>
+						{{range .Items}}
+						<tr>
+							<td>{{.ChrtID}}</td>
+							<td>{{.TrackNumber}}</td>
+							<td>{{.Price}}</td>
+							<td>{{.Rid}}</td>
+							<td>{{.Name}}</td>
+							<td>{{.Sale}}</td>
+							<td>{{.Size}}</td>
+							<td>{{.TotalPrice}}</td>
+							<td>{{.NmID}}</td>
+							<td>{{.Brand}}</td>
+							<td>{{.Status}}</td>
+						</tr>
+						{{end}}
+					</table>
+				</td>
 			</tr>
 			<tr>
 				<td>Locale</td>
-				<td>Cell 2</td>
+				<td>{{.Locale}}</td>
 			</tr>
 			<tr>
 				<td>Internal_signature</td>
-				<td>Cell 2</td>
+				<td>{{.InternalSignature}}</td>
 			</tr>
 			<tr>
 				<td>Customer_id</td>
-				<td>Cell 2</td>
+				<td>{{.CustomerID}}</td>
 			</tr>
 			<tr>
 				<td>Delivery_service</td>
-				<td>Cell2</td>
+				<td>{{.DeliveryService}}</td>
 			</tr>
 			<tr>
 				<td>Shardkey</td>
-				<td>Cell 2</td>
+				<td>{{.Shardkey}}</td>
 			</tr>
 			<tr>
 				<td>Sm_id</td>
-				<td>Cell 2</td>
+				<td>{{.SmID}}</td>
 			</tr>
 			<tr>
 				<td>Date_created</td>
-				<td>Cell 2</td>
+				<td>{{.DateCreated}}</td>
 			</tr>
 			<tr>
 				<td>Oof_shard</td>
-				<td>Cell 2</td>
+				<td>{{.OofShard}}</td>
 			</tr>
 		</tbody>
 	</table>

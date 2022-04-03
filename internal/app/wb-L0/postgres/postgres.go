@@ -54,7 +54,7 @@ func NewClient(ctx context.Context, config *config.Cfg) (*pgxpool.Pool, error) {
 	return pool, nil
 }
 
-func AddPayment() (int, error) {
+func AddPayment(model *storage.ModelJSON) (int, error) {
 	var fkPay int
 
 	q := `INSERT INTO payment (transaction, request_id, currency, provider, 
@@ -62,16 +62,16 @@ func AddPayment() (int, error) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id;`
 	err := Pool.QueryRow(context.Background(), q,
-		storage.Model.Payment.Transaction,
-		storage.Model.Payment.RequestID,
-		storage.Model.Payment.Currency,
-		storage.Model.Payment.Provider,
-		storage.Model.Payment.Amount,
-		storage.Model.Payment.PaymentDt,
-		storage.Model.Payment.Bank,
-		storage.Model.Payment.DeliveryCost,
-		storage.Model.Payment.GoodsTotal,
-		storage.Model.Payment.CustomFee,
+		model.Payment.Transaction,
+		model.Payment.RequestID,
+		model.Payment.Currency,
+		model.Payment.Provider,
+		model.Payment.Amount,
+		model.Payment.PaymentDt,
+		model.Payment.Bank,
+		model.Payment.DeliveryCost,
+		model.Payment.GoodsTotal,
+		model.Payment.CustomFee,
 	).Scan(&fkPay)
 	if err != nil {
 		return 0, err
@@ -80,7 +80,7 @@ func AddPayment() (int, error) {
 	return fkPay, nil
 }
 
-func AddDelivery() (int, error) {
+func AddDelivery(model *storage.ModelJSON) (int, error) {
 	var fkDel int
 
 	q := `INSERT INTO delivery (name, phone, zip, city, 
@@ -88,13 +88,13 @@ func AddDelivery() (int, error) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id;`
 	err := Pool.QueryRow(context.Background(), q,
-		storage.Model.Delivery.Name,
-		storage.Model.Delivery.Phone,
-		storage.Model.Delivery.Zip,
-		storage.Model.Delivery.City,
-		storage.Model.Delivery.Address,
-		storage.Model.Delivery.Region,
-		storage.Model.Delivery.Email,
+		model.Delivery.Name,
+		model.Delivery.Phone,
+		model.Delivery.Zip,
+		model.Delivery.City,
+		model.Delivery.Address,
+		model.Delivery.Region,
+		model.Delivery.Email,
 	).Scan(&fkDel)
 	if err != nil {
 		return 0, err
@@ -103,8 +103,8 @@ func AddDelivery() (int, error) {
 	return fkDel, nil
 }
 
-func AddItems() error {
-	for _, val := range storage.Model.Items {
+func AddItems(model *storage.ModelJSON) error {
+	for _, val := range model.Items {
 		q := `INSERT INTO items (chrt_id, track_number, price, rid, 
 			name, sale, size, total_price, nm_id, brand, status)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
@@ -130,7 +130,7 @@ func AddItems() error {
 	return nil
 }
 
-func AddWb(fkPay, fkDel int) (int, error) {
+func AddWb(fkPay, fkDel int, model *storage.ModelJSON) (int, error) {
 	var fkWb int
 
 	q := `INSERT INTO wb (order_uid, track_number ,entry, delivery_id,
@@ -140,19 +140,19 @@ func AddWb(fkPay, fkDel int) (int, error) {
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		RETURNING id;`
 	err := Pool.QueryRow(context.Background(), q,
-		storage.Model.OrderUID,
-		storage.Model.TrackNumber,
-		storage.Model.Entry,
+		model.OrderUID,
+		model.TrackNumber,
+		model.Entry,
 		fkDel,
 		fkPay,
-		storage.Model.Locale,
-		storage.Model.InternalSignature,
-		storage.Model.CustomerID,
-		storage.Model.DeliveryService,
-		storage.Model.Shardkey,
-		storage.Model.SmID,
-		storage.Model.DateCreated,
-		storage.Model.OofShard,
+		model.Locale,
+		model.InternalSignature,
+		model.CustomerID,
+		model.DeliveryService,
+		model.Shardkey,
+		model.SmID,
+		model.DateCreated,
+		model.OofShard,
 	).Scan(&fkWb)
 	if err != nil {
 		return 0, err
@@ -161,11 +161,11 @@ func AddWb(fkPay, fkDel int) (int, error) {
 	return fkWb, nil
 }
 
-func AddWbItems() error {
-	for _, val := range storage.Model.Items {
+func AddWbItems(model *storage.ModelJSON) error {
+	for _, val := range model.Items {
 		q := `INSERT INTO wb_items (order_uid, chrt_id)
 		VALUES ($1, $2)`
-		_, err := Pool.Exec(context.Background(), q, storage.Model.OrderUID, val.ChrtID)
+		_, err := Pool.Exec(context.Background(), q, model.OrderUID, val.ChrtID)
 		if err != nil {
 			return err
 		}
@@ -174,35 +174,50 @@ func AddWbItems() error {
 	return nil
 }
 
-func AddToDb() {
-	fkPay, err := AddPayment()
+func AddToDb(model *storage.ModelJSON) {
+	fkPay, err := AddPayment(model)
 	fmt.Println("fkPay = ", fkPay)
 	if err != nil {
 		logger.Log.Error(err)
 		return
 	}
 
-	fkDel, err := AddDelivery()
+	fkDel, err := AddDelivery(model)
 	fmt.Println("fkPay = ", fkPay)
 	if err != nil {
 		logger.Log.Error(err)
 		return
 	}
 
-	err = AddItems()
+	err = AddItems(model)
 	if err != nil {
 		logger.Log.Error(err)
 		return
 	}
-	fkWb, err := AddWb(fkPay, fkDel)
+	fkWb, err := AddWb(fkPay, fkDel, model)
 	if err != nil {
 		logger.Log.Error(err)
 		return
 	}
-	err = AddWbItems()
+	err = AddWbItems(model)
 	if err != nil {
 		logger.Log.Error(err)
 		return
 	}
 	fmt.Println("fkPay = ", fkPay, "fkDel = ", fkDel, "fkWb = ", fkWb)
+}
+
+func GetWbTable() error {
+	q := `SELECT wb.order_uid, wb.track_number, wb.entry,
+		   d.name, d.phone, d.zip, d.city, d.address, d.region, d.email,
+		   p.transaction, p.request_id, p.currency, p.provider, p.amount,
+		   p.payment_dt, p.bank, p.delivery_cost, p.goods_total, p.custom_fee,
+		   wb.locale, wb.internal_signature, wb.customer_id, wb.customer_id,
+		   wb.delivery_service, wb.shardkey, wb.sm_id, wb.date_created, wb.oof_shard
+		FROM wb INNER JOIN delivery d on d.id = wb.delivery_id
+		INNER JOIN payment p on p.id = wb.payment_id`
+	rows, err := Pool.Query(context.Background(), q)
+	if err != nil {
+		return err
+	}
 }
