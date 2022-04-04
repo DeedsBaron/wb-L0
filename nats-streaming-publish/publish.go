@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	sp, err := stan.Connect(config.Config.Nats.ServerID, "pub", stan.NatsURL(config.Config.Nats.NatsUrl))
+	sp, err := stan.Connect(config.Config.Nats.ServerID, "pub", stan.NatsURL("nats://localhost:4222"))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
