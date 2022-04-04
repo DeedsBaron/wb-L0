@@ -36,19 +36,6 @@
       "nm_id": 2389212,
       "brand": "Vivienne Sabo",
       "status": 202
-    },
-    {
-      "chrt_id": 6666666,
-      "track_number": "WBILMTESTTRACK",
-      "price": 42,
-      "rid": "abasd342a76123e0btest",
-      "name": "The cake is a lie",
-      "sale": 30,
-      "size": "0",
-      "total_price": 317,
-      "nm_id": 13371337,
-      "brand": "Vivienne Sabo",
-      "status": 202
     }
   ],
   "locale": "en",

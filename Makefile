@@ -1,5 +1,6 @@
 build:
 	@echo "\033[0;32mBuilding binary...\033[m"
+	@echo $(CURDIR)
 	go build -o wb-L0 -v ./cmd/wb-L0/main.go
 
 run: build
@@ -27,7 +28,7 @@ test:
 	 go test -v -count=1 ./... -cover
 
 pub:
-	go run nats-streaming-publish/publish.go
+	go run nats-streaming-publish/publish.go $(FILE)
 
 .PHONY: all lib clean fclean re
 

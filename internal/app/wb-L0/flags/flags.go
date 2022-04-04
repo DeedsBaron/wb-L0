@@ -22,7 +22,4 @@ func ParseFlags() {
 	}
 	flag.StringVar(&ConfigPath, "config-path", path+"/config/wb-L0.toml", "path to config file")
 	flag.Parse()
-	if len(flag.Args()) != 0 {
-		logrus.Fatal("Wrong binary parameters, try -help")
-	}
 }

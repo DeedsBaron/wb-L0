@@ -3,7 +3,7 @@ log_level = "debug"
 requestfreq = 500
 sendmessagetimeout = 2500
 [storage]
-    host = "localhost"
+    host = "postgresql"
     port = "5432"
     database = "test"
     username = "deedsbaron"
@@ -12,6 +12,6 @@ sendmessagetimeout = 2500
 [nats]
     serverID = "test-cluster"
     clientID = "test-wb-L0"
-    natsUrl = "nats://localhost:4222"
+    natsUrl = "nats://nats-streaming:4222"
     interval = 1
     maxout = 5

@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/sirupsen/logrus"
 	"time"
+	"wb-L0/internal/app/wb-L0/channels"
 	"wb-L0/internal/app/wb-L0/config"
 	"wb-L0/internal/app/wb-L0/logger"
 	"wb-L0/internal/app/wb-L0/storage"
@@ -17,7 +18,9 @@ var (
 )
 
 func init() {
-	Pool = NewPostgres()
+	go func() {
+		Pool = NewPostgres()
+	}()
 }
 
 func NewPostgres() *pgxpool.Pool {
@@ -51,6 +54,7 @@ func NewClient(ctx context.Context, config *config.Cfg) (*pgxpool.Pool, error) {
 		logrus.Fatal(err.Error())
 	}
 	logrus.Info("Successfully connected to database")
+	channels.ConnectedToDb <- true
 	return pool, nil
 }
 
@@ -130,16 +134,13 @@ func AddItems(model *storage.ModelJSON) error {
 	return nil
 }
 
-func AddWb(fkPay, fkDel int, model *storage.ModelJSON) (int, error) {
-	var fkWb int
-
+func AddWb(fkPay, fkDel int, model *storage.ModelJSON) error {
 	q := `INSERT INTO wb (order_uid, track_number ,entry, delivery_id,
 			payment_id , locale, internal_signature,
 			customer_id, delivery_service, shardkey,
 			sm_id, date_created ,oof_shard)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-		RETURNING id;`
-	err := Pool.QueryRow(context.Background(), q,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+	_, err := Pool.Exec(context.Background(), q,
 		model.OrderUID,
 		model.TrackNumber,
 		model.Entry,
@@ -153,12 +154,12 @@ func AddWb(fkPay, fkDel int, model *storage.ModelJSON) (int, error) {
 		model.SmID,
 		model.DateCreated,
 		model.OofShard,
-	).Scan(&fkWb)
+	)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	logger.Log.Debug("Successfully added info to Wb table")
-	return fkWb, nil
+	return nil
 }
 
 func AddWbItems(model *storage.ModelJSON) error {
@@ -179,45 +180,98 @@ func AddToDb(model *storage.ModelJSON) {
 	fmt.Println("fkPay = ", fkPay)
 	if err != nil {
 		logger.Log.Error(err)
-		return
 	}
 
 	fkDel, err := AddDelivery(model)
-	fmt.Println("fkPay = ", fkPay)
 	if err != nil {
 		logger.Log.Error(err)
-		return
 	}
 
 	err = AddItems(model)
 	if err != nil {
 		logger.Log.Error(err)
-		return
 	}
-	fkWb, err := AddWb(fkPay, fkDel, model)
+	err = AddWb(fkPay, fkDel, model)
 	if err != nil {
 		logger.Log.Error(err)
-		return
 	}
 	err = AddWbItems(model)
 	if err != nil {
 		logger.Log.Error(err)
-		return
 	}
-	fmt.Println("fkPay = ", fkPay, "fkDel = ", fkDel, "fkWb = ", fkWb)
 }
 
-func GetWbTable() error {
-	q := `SELECT wb.order_uid, wb.track_number, wb.entry,
-		   d.name, d.phone, d.zip, d.city, d.address, d.region, d.email,
-		   p.transaction, p.request_id, p.currency, p.provider, p.amount,
-		   p.payment_dt, p.bank, p.delivery_cost, p.goods_total, p.custom_fee,
-		   wb.locale, wb.internal_signature, wb.customer_id, wb.customer_id,
-		   wb.delivery_service, wb.shardkey, wb.sm_id, wb.date_created, wb.oof_shard
-		FROM wb INNER JOIN delivery d on d.id = wb.delivery_id
-		INNER JOIN payment p on p.id = wb.payment_id`
-	rows, err := Pool.Query(context.Background(), q)
+func GetItems(model *storage.ModelJSON) error {
+	q := `SELECT i.chrt_id, i.track_number, i.price, i.rid, i.name,
+      		i.sale, i.size, i.total_price, i.nm_id, i.brand,
+			i.status
+		FROM wb_items
+   		INNER JOIN items i on i.chrt_id = wb_items.chrt_id
+		WHERE wb_items.order_uid = $1`
+	rows, err := Pool.Query(context.Background(), q, model.OrderUID)
 	if err != nil {
 		return err
+	}
+
+	for rows.Next() {
+		items := storage.Items{}
+
+		rows.Scan(&items.ChrtID, &items.TrackNumber, &items.Price,
+			&items.Rid, &items.Name, &items.Sale, &items.Size, &items.TotalPrice, &items.NmID,
+			&items.Brand, &items.Status)
+		if rows.Err() != nil {
+			return rows.Err()
+		}
+		model.Items = append(model.Items, items)
+	}
+	rows.Close()
+	return nil
+}
+
+func RecoverCash() {
+	for {
+		select {
+		case <-channels.ConnectedToDb:
+			q := `SELECT wb.order_uid, wb.track_number, wb.entry,
+					   d.name, d.phone, d.zip, d.city, d.address, d.region, d.email,
+					   p.transaction, p.request_id, p.currency, p.provider, p.amount,
+					   p.payment_dt, p.bank, p.delivery_cost, p.goods_total, p.custom_fee,
+					   wb.locale, wb.internal_signature, wb.customer_id, wb.delivery_service, 
+					   wb.shardkey, wb.sm_id, wb.date_created, wb.oof_shard
+				FROM wb 
+					INNER JOIN delivery d on d.id = wb.delivery_id
+					INNER JOIN payment p on p.id = wb.payment_id`
+			rows, err := Pool.Query(context.Background(), q)
+			if err != nil {
+				logger.Log.Error(err.Error())
+				return
+			}
+
+			for rows.Next() {
+				model := &storage.ModelJSON{}
+
+				rows.Scan(&model.OrderUID, &model.TrackNumber, &model.Entry,
+					&model.Delivery.Name, &model.Delivery.Phone, &model.Delivery.Zip,
+					&model.Delivery.City, &model.Delivery.Address, &model.Delivery.Region, &model.Delivery.Email,
+					&model.Payment.Transaction, &model.Payment.RequestID, &model.Payment.Currency, &model.Payment.Provider,
+					&model.Payment.Amount, &model.Payment.PaymentDt, &model.Payment.Bank, &model.Payment.DeliveryCost,
+					&model.Payment.GoodsTotal, &model.Payment.CustomFee,
+					&model.Locale, &model.InternalSignature, &model.CustomerID, &model.DeliveryService, &model.Shardkey, &model.SmID,
+					&model.DateCreated, &model.OofShard)
+
+				if rows.Err() != nil {
+					logger.Log.Error(rows.Err())
+					return
+				}
+				err = GetItems(model)
+				if err != nil {
+					logger.Log.Error(err)
+					return
+				}
+				storage.AddToCash(model)
+			}
+			rows.Close()
+		}
+		logger.Log.Info("Cash recovered")
 	}
 }

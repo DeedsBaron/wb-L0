@@ -16,7 +16,7 @@ func main() {
 	}
 
 	var message []byte
-	f, err := os.Open("nats-streaming-publish/publish.json")
+	f, err := os.Open("nats-streaming-publish/" + os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}

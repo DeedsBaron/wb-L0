@@ -26,17 +26,18 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-#
-#  spam:
-#    container_name: spam
-#    depends_on:
-#      - postgresql
-#    build:
-#      context: spam/
-#    image: spam
-#    restart: always
-#    ports:
-#      - "8080:${SPAM_PORT}"
+
+  wb-L0:
+    container_name: wb-L0
+    depends_on:
+      - postgresql
+      - nats-streaming
+    build:
+      context: ./
+    image: wbl0
+    restart: always
+    ports:
+      - "8080:${WBL0_PORT}"
 
 volumes:
   db-data:

@@ -1,0 +1,62 @@
+{
+  "order_uid": "The cake is a lieThe cake is a lie",
+  "track_number": "WBIllBIll",
+  "entry": "WBil",
+  "delivery": {
+    "name": "Kek Kekov",
+    "phone": "+133713371337",
+    "zip": "42",
+    "city": "Moscow",
+    "address": "Ploshad Mira 15",
+    "region": "Re",
+    "email": "test@gmail.com"
+  },
+  "payment": {
+    "transaction": "dsfsdfsdfsdf",
+    "request_id": "42",
+    "currency": "USD",
+    "provider": "wbpay",
+    "amount": 100,
+    "payment_dt": 131321312,
+    "bank": "tink",
+    "delivery_cost": 2000,
+    "goods_total": 2300,
+    "custom_fee": 1337
+  },
+  "items": [
+    {
+      "chrt_id": 12,
+      "track_number": "WWWW",
+      "price": 453,
+      "rid": "asdasdasdas",
+      "name": "Marco",
+      "sale": 10,
+      "size": "0",
+      "total_price": 228,
+      "nm_id": 44444,
+      "brand": "El paso",
+      "status": 202
+    },
+    {
+      "chrt_id": 1309000,
+      "track_number": "WBILMTESTTRACK",
+      "price": 42,
+      "rid": "abasd342a76123e0btest",
+      "name": "The cake is a lie",
+      "sale": 42,
+      "size": "0",
+      "total_price": 317,
+      "nm_id": 13371337,
+      "brand": "Rocket",
+      "status": 202
+    }
+  ],
+  "locale": "ru",
+  "internal_signature": "",
+  "customer_id": "blabla",
+  "delivery_service": "esss",
+  "shardkey": "100",
+  "sm_id": 42,
+  "date_created": "2021-11-26T06:22:19Z",
+  "oof_shard": "gg"
+}

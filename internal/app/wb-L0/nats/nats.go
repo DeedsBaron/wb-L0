@@ -3,7 +3,6 @@ package nats
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/nats-io/stan.go"
 	"time"
 	"wb-L0/internal/app/wb-L0/channels"
@@ -81,7 +80,6 @@ func Subscribe() {
 				}
 
 				storage.AddToCash(model)
-				fmt.Println("Store", storage.Cash)
 				postgres.AddToDb(model)
 
 			}, stan.DurableName("durableID"),

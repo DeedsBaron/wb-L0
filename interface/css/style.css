@@ -1,30 +1,30 @@
-html,
-body {
+html {
   height: 100%;
 }
-body {
+body, h1{
   margin: 0;
+  padding: 2rem;
   background: -webkit-linear-gradient(45deg, #49a09d, #5f2c82);
-  background: linear-gradient(45deg, #49a09d, #5f2c82);
+  background: repeating-linear-gradient(45deg, #49a09d, #5f2c82);
   font-family: sans-serif;
   font-weight: 100;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 .container {
   position: absolute;
-  top: 50%;
+  top: 75%;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 table {
   width: 800px;
-  border-collapse: collapse;
+  border-collapse:separate;
   overflow: hidden;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
-th,
-td {
-  padding: 15px;
+th, td {
+  padding: 10px;
   background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
@@ -34,19 +34,13 @@ th {
 thead th {
   background-color: #55608f;
 }
-tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+caption {
+  color: white;
 }
-tbody td {
-  position: relative;
-}
-tbody td:hover:before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -9999px;
-  bottom: -9999px;
-  background-color: rgba(255, 255, 255, 0.2);
-  z-index: -1;
+
+h1 {
+  position: fixed;
+  top: -1%;
+  left: -1%;
+  color: #fff;
 }

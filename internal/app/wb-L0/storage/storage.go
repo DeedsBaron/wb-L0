@@ -15,6 +15,20 @@ type Storage struct {
 	Mu    sync.Mutex
 }
 
+type Items struct {
+	ChrtID      int    `json:"chrt_id" validate:"required"`
+	TrackNumber string `json:"track_number" validate:"required"`
+	Price       int    `json:"price" validate:"required"`
+	Rid         string `json:"rid" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	Sale        int    `json:"sale" validate:"required"`
+	Size        string `json:"size" validate:"required"`
+	TotalPrice  int    `json:"total_price" validate:"required"`
+	NmID        int    `json:"nm_id" validate:"required"`
+	Brand       string `json:"brand" validate:"required"`
+	Status      int    `json:"status" validate:"required"`
+}
+
 type ModelJSON struct {
 	OrderUID    string `json:"order_uid" validate:"required"`
 	TrackNumber string `json:"track_number" validate:"required"`
@@ -43,19 +57,7 @@ type ModelJSON struct {
 		CustomFee    int    `json:"custom_fee"`
 	} `json:"payment" validate:"required"`
 
-	Items []struct {
-		ChrtID      int    `json:"chrt_id" validate:"required"`
-		TrackNumber string `json:"track_number" validate:"required"`
-		Price       int    `json:"price" validate:"required"`
-		Rid         string `json:"rid" validate:"required"`
-		Name        string `json:"name" validate:"required"`
-		Sale        int    `json:"sale" validate:"required"`
-		Size        string `json:"size" validate:"required"`
-		TotalPrice  int    `json:"total_price" validate:"required"`
-		NmID        int    `json:"nm_id" validate:"required"`
-		Brand       string `json:"brand" validate:"required"`
-		Status      int    `json:"status" validate:"required"`
-	} `json:"items" validate:"required,dive"`
+	Items []Items `json:"items" validate:"required,dive"`
 
 	Locale            string    `json:"locale" validate:"required"`
 	InternalSignature string    `json:"internal_signature"`
@@ -71,19 +73,15 @@ func init() {
 	Cash = NewCash()
 }
 
-func RecoverCash() {
-
-}
-
 func AddToCash(model *ModelJSON) {
 	Cash.Mu.Lock()
 	if _, ok := Cash.Store[model.OrderUID]; ok {
-		logger.Log.Info("This model is already in cash memory")
+		logger.Log.Debug("This model is already in cash memory")
 		Cash.Mu.Unlock()
 		return
 	}
 	Cash.Store[model.OrderUID] = *model
-	logger.Log.Info("Successfully added model to cash memory")
+	logger.Log.Debug("Successfully added model to cash memory")
 	Cash.Mu.Unlock()
 }
 
